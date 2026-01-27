@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live Leaderboard</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0b0f1a;
+  --card: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.12);
+  --text: #ffffff;
+  --muted: rgba(255,255,255,0.6);
+  --accent: #e9c007;
+}
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* BODY */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: radial-gradient(1200px 600px at top, #12182a, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* CONTAINER */
+.container {
+  width: 100%;
+  max-width: 900px;
+  padding: 24px;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.header p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* CARD */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  animation: fadeUp 0.8s ease forwards;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: rgba(255,255,255,0.05);
+}
+
+th, td {
+  padding: 18px;
+  text-align: center;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+tbody tr {
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+tbody tr:hover {
+  background: rgba(255,255,255,0.04);
+  transform: scale(1.01);
+}
+
+/* RANK STYLES */
+.rank-1 td {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rank-2 td {
+  color: #d1d5db;
+  font-weight: 600;
+}
+
+.rank-3 td {
+  color: #c08457;
+  font-weight: 600;
+}
+
+/* SCORE */
+.score {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ANIMATION */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* TV MODE */
+@media (min-width: 1600px) {
+  .container {
+    max-width: 1200px;
+  }
+  .score {
+    font-size: 26px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Live Leaderboard</h1>
+    <p>Real-time score updates</p>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Team</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Updates automatically • Live system
+  </div>
+</div>
+
+<script>
+const sheetId = "PASTE_YOUR_SHEET_ID";
+const sheetName = "Leaderboard";
+
+const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+fetch(url)
+  .then(res => res.text())
+  .then(text => {
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const rows = json.table.rows;
+    const tbody = document.getElementById("leaderboard");
+
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.classList.add(`rank-${i + 1}`);
+
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${r.c[0].v}</td>
+        <td class="score">${r.c[1].v}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  });
+
+// Auto refresh (broadcast style)
+setInterval(() => location.reload(), 15000);
+</script>
+
+</body>
+</html>
